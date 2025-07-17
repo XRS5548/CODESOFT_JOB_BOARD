@@ -28,8 +28,60 @@ import {
   SearchIcon,
 } from "@/components/icons";
 import { Logo } from "@/components/icons";
+import { useEffect, useState } from "react";
+import AuthButton from "./AuthButton";
 
 export const Navbar = () => {
+
+  const [userinfo, setUserinfo] = useState({
+    name: "",
+    email: "",
+    role: ""
+  });
+
+  // const API = "http://localhost:5000/"; // ya jo bhi tumhara backend ka base URL hai
+
+  function verifyUser() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+  
+    fetch(API + "userinfo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ token })
+    })
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setUserinfo({
+            name: response.name,
+            email: response.email,
+            role: response.role
+          });
+  
+          localStorage.setItem("role", response.role);
+          localStorage.setItem("name", response.name);
+          localStorage.setItem("email", response.email);
+        } else {
+          localStorage.removeItem("token")
+          console.warn("User verification failed:", response.message);
+        }
+      })
+      .catch(err => {
+        console.error("Request failed:", err);
+      });
+  }
+  
+
+  useEffect(() => {
+    verifyUser();
+
+
+  }, []);
+
+
   // 🔍 Search Input (used in desktop + mobile menus)
   const searchInput = (
     <Input
@@ -109,15 +161,8 @@ export const Navbar = () => {
 
         {/* Sponsor Button */}
         <NavbarItem className="hidden md:flex">
-          <Button
-            color="primary"
-            as={Link}
-            className="text-sm font-normal  "
-            href={siteConfig.links.login}
-            variant="flat"
-          >
-            Login
-          </Button>
+          
+         <AuthButton />
         </NavbarItem>
       </NavbarContent>
 
