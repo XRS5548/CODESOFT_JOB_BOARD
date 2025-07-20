@@ -6,6 +6,10 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 
 export default function ApplyJob() {
+  if (!localStorage.getItem("token")) {
+     location.href = "/login";
+  }
+
   const { id } = useParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
