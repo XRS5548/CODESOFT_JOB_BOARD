@@ -1,5 +1,4 @@
 // Importing HeroUI Components
-import { Button } from "@heroui/button";
 import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
 import { Input } from "@heroui/input";
@@ -27,17 +26,13 @@ import {
   DiscordIcon,
   SearchIcon,
 } from "@/components/icons";
-import { Logo } from "@/components/icons";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import AuthButton from "./AuthButton";
+import API from "@/config/API";
 
 export const Navbar = () => {
 
-  const [userinfo, setUserinfo] = useState({
-    name: "",
-    email: "",
-    role: ""
-  });
+ 
 
   // const API = "http://localhost:5000/"; // ya jo bhi tumhara backend ka base URL hai
 
@@ -55,11 +50,7 @@ export const Navbar = () => {
       .then(res => res.json())
       .then(response => {
         if (response.success) {
-          setUserinfo({
-            name: response.name,
-            email: response.email,
-            role: response.role
-          });
+          
   
           localStorage.setItem("role", response.role);
           localStorage.setItem("name", response.name);

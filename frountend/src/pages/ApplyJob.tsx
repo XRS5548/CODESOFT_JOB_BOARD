@@ -52,7 +52,6 @@ export default function ApplyJob() {
 
     xhr.onload = function () {
       if (xhr.status === 200) {
-        const resData = JSON.parse(xhr.responseText);
         setMessage("✅ Successfully applied to the job.");
       } else {
         const errData = JSON.parse(xhr.responseText);

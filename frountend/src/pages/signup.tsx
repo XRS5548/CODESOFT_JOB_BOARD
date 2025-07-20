@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Form, Input, Button, Select, SelectItem } from "@heroui/react";
+import {  Input, Button, Select, SelectItem } from "@heroui/react";
 import DefaultLayout from "@/layouts/default";
+import API from "@/config/API";
 
 export default function Signup() {
     const [submitted, setSubmitted] = useState(false);
@@ -79,7 +80,7 @@ export default function Signup() {
                             />
                             <Select name="role" label="Select Role">
                                 {["Job Seeker", "Hiring agent"].map((typ, index) => (
-                                    <SelectItem key={index} value={typ}>
+                                    <SelectItem key={index} textValue={typ}>
                                         {typ}
                                     </SelectItem>
                                 ))}

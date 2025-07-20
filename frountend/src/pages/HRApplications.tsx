@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DefaultLayout from "@/layouts/default";
 import {
   Table,
   TableHeader,
@@ -8,9 +7,10 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/react";
-import {Card, CardHeader, CardBody, CardFooter} from "@heroui/card";
+import {Card, CardHeader, CardBody} from "@heroui/card";
 import { Select, SelectItem } from "@heroui/select";
 import { Spinner } from "@heroui/spinner";
+import API from "@/config/API";
 
 interface Application {
   _id: string;
@@ -39,6 +39,7 @@ export default function HRApplications() {
         setLoading(false);
         return;
       }
+
 
       try {
         const res = await fetch(`${API}myapplications`, {
