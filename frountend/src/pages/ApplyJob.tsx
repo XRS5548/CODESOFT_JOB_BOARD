@@ -1,116 +1,142 @@
-"use client";
-
 import DefaultLayout from "@/layouts/default";
-import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
-import  { useState, ChangeEvent, FormEvent } from "react";
+import { useParams } from "react-router-dom";
+import { useState } from "react";
 
-type FormDataType = {
-  name: string;
-  email: string;
-  resume: File | null;
-  coverLetter: string;
-};
+export default function ApplyJob() {
+    const { id } = useParams();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [linkedin, setLinkedin] = useState("");
+    const [portfolio, setPortfolio] = useState("");
+    const [coverLetter, setCoverLetter] = useState("");
+    const [resume, setResume] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
 
-export default function ApplyForm() {
-  const [formData, setFormData] = useState<FormDataType>({
-    name: "",
-    email: "",
-    resume: null,
-    coverLetter: "",
-  });
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const token = localStorage.getItem("token");
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+        if (!token || !id) {
+            setMessage("❌ Missing token or job ID.");
+            return;
+        }
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({ ...prev, resume: file }));
-  };
+        if (!name || !email || !phone || !linkedin || !coverLetter || !resume) {
+            setMessage("❌ Please fill all required fields and upload resume.");
+            return;
+        }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Submitted Data:", formData);
+        const formData = new FormData();
+        formData.append("jobId", id);
+        formData.append("name", name);
+        formData.append("email", email);
+        formData.append("phone", phone);
+        formData.append("linkedin", linkedin);
+        formData.append("portfolio", portfolio);
+        formData.append("coverLetter", coverLetter);
+        formData.append("resume", resume);
 
-    // Example: FormData send to backend
-    const payload = new FormData();
-    payload.append("name", formData.name);
-    payload.append("email", formData.email);
-    if (formData.resume) payload.append("resume", formData.resume);
-    payload.append("coverLetter", formData.coverLetter);
+        setLoading(true);
+        try {
+            const res = await fetch(`https://codesoft-job-board.onrender.com/api/apply`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
 
-    // TODO: use fetch to POST this payload to backend
-  };
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to apply");
 
-  return (
-    <DefaultLayout>
-      <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">Apply for a Job</h1>
-        <h2>
-          Job:{" "}
-          <span className="font-medium">
-            Data Science Engineer, at Deloitte
-          </span>
-        </h2>
-        <hr />
+            setMessage("✅ Successfully applied for the job.");
+        } catch (err: any) {
+            setMessage(`❌ ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        <div>
-          <label className="block mb-1 text-sm font-medium">Full Name</label>
-          <Input
-            type="text"
-            name="name"
-            placeholder="e.g. John Doe"
-            required
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </div>
+    return (
+        <DefaultLayout>
+            <div className="max-w-2xl mx-auto p-6">
+                <h1 className="text-2xl font-bold mb-4 text-center">Apply for Job</h1>
+                <p className="text-center mb-6">Job ID: <code>{id}</code></p>
 
-        <div>
-          <label className="block mb-1 text-sm font-medium">Email Address</label>
-          <Input
-            type="email"
-            name="email"
-            required
-            placeholder="e.g. example@email.com"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full border p-2 rounded"
+                        required
+                    />
 
-        <div>
-          <label className="block mb-1 text-sm font-medium">Resume (PDF)</label>
-          <Input
-            type="file"
-            name="resume"
-            accept=".pdf"
-            required
-            onChange={handleFileChange}
-            className="w-full"
-          />
-        </div>
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full border p-2 rounded"
+                        required
+                    />
 
-        <div>
-          <label className="block mb-1 text-sm font-medium">
-            Cover Letter (optional)
-          </label>
-          <Textarea
-            name="coverLetter"
-            rows={4}
-            placeholder="Write your cover letter here..."
-            value={formData.coverLetter}
-            onChange={handleChange}
-          />
-        </div>
+                    <input
+                        type="text"
+                        placeholder="Phone Number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full border p-2 rounded"
+                        required
+                    />
 
-        <Button type="submit" color="primary">
-          Submit Application
-        </Button>
-      </form>
-    </DefaultLayout>
-  );
+                    <input
+                        type="url"
+                        placeholder="LinkedIn Profile"
+                        value={linkedin}
+                        onChange={(e) => setLinkedin(e.target.value)}
+                        className="w-full border p-2 rounded"
+                        required
+                    />
+
+                    <input
+                        type="url"
+                        placeholder="Portfolio Website (optional)"
+                        value={portfolio}
+                        onChange={(e) => setPortfolio(e.target.value)}
+                        className="w-full border p-2 rounded"
+                    />
+
+                    <textarea
+                        placeholder="Cover Letter"
+                        value={coverLetter}
+                        onChange={(e) => setCoverLetter(e.target.value)}
+                        className="w-full border p-2 rounded h-32"
+                        required
+                    />
+
+                    <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => setResume(e.target.files?.[0] || null)}
+                        className="w-full border p-2 rounded"
+                        required
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full border p-2 rounded hover:bg-black hover:text-white transition"
+                    >
+                        {loading ? "Submitting..." : "Submit Application"}
+                    </button>
+
+                    {message && <p className="text-center mt-2">{message}</p>}
+                </form>
+            </div>
+        </DefaultLayout>
+    );
 }

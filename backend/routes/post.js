@@ -247,40 +247,68 @@ router.get("/jobs/:id", async (req, res) => {
 
 router.post("/apply", UserauthMiddleware, async (req, res) => {
   const userId = req.user; // From token
-  const { jobId } = req.body;
+  const {
+    jobId,
+    name,
+    email,
+    phone,
+    linkedin,
+    portfolio,
+    coverLetter,
+  } = req.body;
 
-  if (!jobId) {
-    return res.status(400).json({ error: "Job ID is required" });
+  const resume = req.files?.resume;
+
+  // Validate inputs
+  if (!jobId || !name || !email || !phone || !linkedin || !coverLetter || !resume) {
+    return res.status(400).json({ error: "❌ Missing required fields or resume file." });
   }
 
   try {
     const db = client.db("jobboard");
     const jobsCollection = db.collection("jobs");
+    const applicationsCollection = db.collection("applications");
 
+    // ✅ Check if job exists
     const job = await jobsCollection.findOne({ _id: new ObjectId(jobId) });
-    if (!job) {
-      return res.status(404).json({ error: "Job not found" });
-    }
+    if (!job) return res.status(404).json({ error: "❌ Job not found" });
 
-    // Prevent duplicate application
-    const alreadyApplied = job.applications?.includes(userId);
+    // ✅ Prevent duplicate application
+    const alreadyApplied = await applicationsCollection.findOne({
+      jobId: new ObjectId(jobId),
+      userId: new ObjectId(userId),
+    });
+
     if (alreadyApplied) {
-      return res.status(400).json({ error: "You already applied to this job" });
+      return res.status(400).json({ error: "❌ You already applied to this job" });
     }
 
-    // Update job document to add user to applications
-    await jobsCollection.updateOne(
-      { _id: new ObjectId(jobId) },
-      { $addToSet: { applications: userId } } // $addToSet prevents duplicates
-    );
+    // ✅ Save application
+    const applicationData = {
+      jobId: new ObjectId(jobId),
+      userId: new ObjectId(userId),
+      name,
+      email,
+      phone,
+      linkedin,
+      portfolio,
+      coverLetter,
+      resume: {
+        name: resume.name,
+        mimetype: resume.mimetype,
+        data: resume.data, // 👈 File buffer stored in DB
+      },
+      createdAt: new Date(),
+    };
 
-    res.status(200).json({ message: "Applied successfully" });
-  } catch (error) {
-    console.error("Error applying to job:", error);
+    await applicationsCollection.insertOne(applicationData);
+
+    res.status(200).json({ message: "✅ Successfully applied to the job." });
+  } catch (err) {
+    console.error("❌ Error applying to job:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 
 module.exports = router;
