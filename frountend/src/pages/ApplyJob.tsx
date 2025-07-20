@@ -21,7 +21,7 @@ export default function ApplyJob() {
     }
   }, [id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
@@ -43,26 +43,33 @@ export default function ApplyJob() {
     formData.append("linkedin", linkedin);
     formData.append("portfolio", portfolio);
     formData.append("coverLetter", coverLetter);
+    formData.append("token", token); // ✅ body me token bhej rahe hain
     formData.append("resume", resume);
-    formData.append("token", token); // ✅ token in body, not header
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", "https://codesoft-job-board.onrender.com/api/apply", true);
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        const resData = JSON.parse(xhr.responseText);
+        setMessage("✅ Successfully applied to the job.");
+      } else {
+        const errData = JSON.parse(xhr.responseText);
+        setMessage(`❌ ${errData.error || "Failed to apply"}`);
+      }
+      setLoading(false);
+    };
+
+    xhr.onerror = function () {
+      setMessage("❌ Request failed");
+      setLoading(false);
+    };
 
     setLoading(true);
-    try {
-      const res = await fetch(`https://codesoft-job-board.onrender.com/api/apply`, {
-        method: "POST",
-        body: formData, // ✅ send FormData directly
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to apply");
-
-      setMessage("✅ Successfully applied for the job.");
-    } catch (err: any) {
-      setMessage(`❌ ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    xhr.send(formData);
   };
+
 
   return (
     <DefaultLayout>

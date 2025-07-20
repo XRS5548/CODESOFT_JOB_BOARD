@@ -16,13 +16,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/api", post);
+
 
 // Static Files
 app.use(express.static("public"));
 app.use(fileupload({
   createParentPath: true
 }));
+
+
+app.use("/api", post);
 
 
 

@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 const { MongoClient } = require('mongodb');
 
 function UserauthMiddleware(req, res, next) {
-    const token = req.body.token ;
+    console.log(req.files);
+    const token = req.body.token || undefined ;
     if (!token) {
         return res.status(401).json({ error: 'No token provided' });
     }
