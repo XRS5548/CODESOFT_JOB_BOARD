@@ -20,7 +20,7 @@ export default function HeroSection() {
               Find Jobs
             </a>
             <a
-              href="/post-job"
+              href="/login"
               className="inline-block px-6 py-3 border border-blue-600 text-blue-600 font-medium rounded-md hover:bg-blue-50 transition"
             >
               Post a Job
