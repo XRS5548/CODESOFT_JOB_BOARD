@@ -1,4 +1,5 @@
 import DefaultLayout from "@/layouts/default";
+import { Button } from "@heroui/button";
 import { useEffect, useState } from "react";
 
 interface Application {
@@ -88,13 +89,12 @@ export default function SeekerDashboard() {
                       <td className="p-3">{app.company}</td>
                       <td className="p-3">
                         <span
-                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                            app.status === "Selected"
+                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${app.status === "Selected"
                               ? "text-green-600"
                               : app.status === "Rejected"
-                              ? "text-red-600"
-                              : "text-yellow-600"
-                          }`}
+                                ? "text-red-600"
+                                : "text-yellow-600"
+                            }`}
                         >
                           {app.status}
                         </span>
@@ -108,6 +108,16 @@ export default function SeekerDashboard() {
           </>
         )}
       </section>
+      <div className="flex justify-center">
+
+        <Button color="danger" className="mt-6" onClick={() => {
+          if (confirm("Are you sure you want to logout?")) {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+          }
+        }} >LOGOUT</Button>
+      </div>
+
     </DefaultLayout>
   );
 }

@@ -393,6 +393,12 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
           company: job?.company || "Unknown",
           status: app.status || "Applied",
           appliedAt: app.createdAt,
+
+          // ✅ Add these:
+          linkedin: app.linkedin || "",
+          portfolio: app.portfolio || "",
+          coverLetter: app.coverLetter || "",
+          resumePath: app.resumePath || "",
         };
       })
     );
@@ -403,6 +409,8 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
 
 
 router.post("/setapplication", UserauthMiddleware, async (req, res) => {
@@ -439,38 +447,38 @@ router.post("/setapplication", UserauthMiddleware, async (req, res) => {
 
 // POST /api/jobs/delete
 router.post("/jobs/delete", UserauthMiddleware, async (req, res) => {
-    const { jobId, token } = req.body;
-    const userId = req.user;
+  const { jobId, token } = req.body;
+  const userId = req.user;
 
-    const db = client.db("jobboard");
-    const jobsCollection = db.collection("jobs");
+  const db = client.db("jobboard");
+  const jobsCollection = db.collection("jobs");
 
-    const job = await jobsCollection.findOne({ _id: new ObjectId(jobId), user: userId });
+  const job = await jobsCollection.findOne({ _id: new ObjectId(jobId), user: userId });
 
-    if (!job) return res.status(404).json({ error: "Job not found or not authorized" });
+  if (!job) return res.status(404).json({ error: "Job not found or not authorized" });
 
-    await jobsCollection.deleteOne({ _id: new ObjectId(jobId) });
+  await jobsCollection.deleteOne({ _id: new ObjectId(jobId) });
 
-    res.json({ message: "✅ Job deleted" });
+  res.json({ message: "✅ Job deleted" });
 });
 
 // POST /api/jobs/edit
 router.post("/jobs/edit", UserauthMiddleware, async (req, res) => {
-    const { jobId, title, description, token } = req.body;
-    const userId = req.user;
+  const { jobId, title, description, token } = req.body;
+  const userId = req.user;
 
-    const db = client.db("jobboard");
-    const jobsCollection = db.collection("jobs");
+  const db = client.db("jobboard");
+  const jobsCollection = db.collection("jobs");
 
-    const result = await jobsCollection.updateOne(
-        { _id: new ObjectId(jobId), user:userId },
-        { $set: { title, description } }
-    );
+  const result = await jobsCollection.updateOne(
+    { _id: new ObjectId(jobId), user: userId },
+    { $set: { title, description } }
+  );
 
-    if (result.modifiedCount === 0)
-        return res.status(404).json({ error: "Update failed or unauthorized" });
+  if (result.modifiedCount === 0)
+    return res.status(404).json({ error: "Update failed or unauthorized" });
 
-    res.json({ message: "✅ Job updated" });
+  res.json({ message: "✅ Job updated" });
 });
 
 

@@ -31,7 +31,7 @@ export default function PosterDashboard() {
 
   return (
     <DefaultLayout>
-      <div className="flex h-screen">
+      <div className="flex min-h-[70vh]">
         {/* Sidebar */}
         <aside className="w-64 border-r p-4 flex flex-col justify-between">
           <div className="flex flex-col gap-3">
@@ -46,7 +46,7 @@ export default function PosterDashboard() {
             ))}
             <hr />
           </div>
-          <Button color="danger" onClick={() => alert("Logout")}>
+          <Button color="danger" onClick={() => {if(confirm("Are you sure you want to logout?"))  localStorage.removeItem("token") ;  window.location.href = "/login";}}>
             Logout
           </Button>
         </aside>

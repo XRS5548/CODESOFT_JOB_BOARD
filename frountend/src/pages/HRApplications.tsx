@@ -7,9 +7,17 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/react";
-import {Card, CardHeader, CardBody} from "@heroui/card";
+import { Card, CardHeader, CardBody } from "@heroui/card";
 import { Select, SelectItem } from "@heroui/select";
 import { Spinner } from "@heroui/spinner";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@heroui/modal";
+import { Button } from "@heroui/button";
 import API from "@/config/API";
 
 interface Application {
@@ -21,14 +29,17 @@ interface Application {
   company: string;
   status: string;
   appliedAt: string;
+  linkedin?: string;
+  portfolio?: string;
+  coverLetter?: string;
+  resumePath?: string;
 }
-
-// const API = import.meta.env.VITE_API_BASE || "http://localhost:3000/api/"; // replace as needed
 
 export default function HRApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
   const token = localStorage.getItem("token");
 
@@ -40,13 +51,11 @@ export default function HRApplications() {
         return;
       }
 
-
       try {
         const res = await fetch(`${API}myapplications`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ token }),
         });
@@ -71,7 +80,6 @@ export default function HRApplications() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ token, applicationId, status: newStatus }),
       });
@@ -90,66 +98,160 @@ export default function HRApplications() {
   };
 
   return (
-      <section className=" py-12  ">
-        <Card>
-          <CardHeader>
-            <CardHeader className="text-2xl">HR Dashboard</CardHeader>
-          </CardHeader>
-          <CardBody>
-            {loading ? (
-              <div className="flex justify-center py-6">
-                <Spinner size="lg" />
+    <section className="py-12">
+      <Card>
+        <CardHeader className="text-2xl">HR Dashboard</CardHeader>
+        <CardBody>
+          {loading ? (
+            <div className="flex justify-center py-6">
+              <Spinner size="lg" />
+            </div>
+          ) : error ? (
+            <span className="text-red-500">{error}</span>
+          ) : applications.length === 0 ? (
+            <span>No applications found.</span>
+          ) : (
+            <Table isStriped isCompact aria-label="All Applications Table">
+              <TableHeader>
+                <TableColumn>Name</TableColumn>
+                <TableColumn>Email</TableColumn>
+                <TableColumn>Phone</TableColumn>
+                <TableColumn>Job Title</TableColumn>
+                <TableColumn>Company</TableColumn>
+                <TableColumn>Applied On</TableColumn>
+                <TableColumn>Status</TableColumn>
+                <TableColumn>Update</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {applications.map((app) => (
+                  // console.log(app),
+                  <TableRow
+                    key={app._id}
+                    onClick={() => setSelectedApp(app)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell>{app.name}</TableCell>
+                    <TableCell>{app.email}</TableCell>
+                    <TableCell>{app.phone}</TableCell>
+                    <TableCell>{app.jobTitle}</TableCell>
+                    <TableCell>{app.company}</TableCell>
+                    <TableCell>
+                      {new Date(app.appliedAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="capitalize">{app.status}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Select
+                        size="sm"
+                        variant="flat"
+                        aria-label="Select status"
+                        selectedKeys={[app.status]}
+                        onChange={(e) =>
+                          handleStatusChange(app._id, e.target.value)
+                        }
+                      >
+                        <SelectItem key="Applied">Applied</SelectItem>
+                        <SelectItem key="Selected">Selected</SelectItem>
+                        <SelectItem key="Rejected">Rejected</SelectItem>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Modal for Application Details */}
+      {selectedApp && (
+        <Modal isOpen={!!selectedApp} onClose={() => setSelectedApp(null)}>
+
+          <ModalContent className="max-h-[90vh] overflow-auto">
+            <ModalHeader>Application Detail</ModalHeader>
+            <ModalBody className="space-y-3 text-sm">
+              <div>
+                <strong>Name:</strong> {selectedApp.name}
               </div>
-            ) : error ? (
-              <span color="danger">{error}</span>
-            ) : applications.length === 0 ? (
-              <span>No applications found.</span>
-            ) : (
-              <Table isStriped isCompact aria-label="All Applications Table">
-                <TableHeader>
-                  <TableColumn>Name</TableColumn>
-                  <TableColumn>Email</TableColumn>
-                  <TableColumn>Phone</TableColumn>
-                  <TableColumn>Job Title</TableColumn>
-                  <TableColumn>Company</TableColumn>
-                  <TableColumn>Applied On</TableColumn>
-                  <TableColumn>Status</TableColumn>
-                  <TableColumn>Update</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {applications.map((app) => (
-                    <TableRow key={app._id}>
-                      <TableCell>{app.name}</TableCell>
-                      <TableCell>{app.email}</TableCell>
-                      <TableCell>{app.phone}</TableCell>
-                      <TableCell>{app.jobTitle}</TableCell>
-                      <TableCell>{app.company}</TableCell>
-                      <TableCell>
-                        {new Date(app.appliedAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="capitalize">{app.status}</TableCell>
-                      <TableCell>
-                        <Select
-                          size="sm"
-                          variant="flat"
-                          aria-label="Select status"
-                          selectedKeys={[app.status]}
-                          onChange={(e) =>
-                            handleStatusChange(app._id, e.target.value)
-                          }
-                        >
-                          <SelectItem key="Applied">Applied</SelectItem>
-                          <SelectItem key="Selected">Selected</SelectItem>
-                          <SelectItem key="Rejected">Rejected</SelectItem>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardBody>
-        </Card>
-      </section>
+              <div>
+                <strong>Email:</strong> {selectedApp.email}
+              </div>
+              <div>
+                <strong>Phone:</strong> {selectedApp.phone}
+              </div>
+              <div>
+                <strong>Job Title:</strong> {selectedApp.jobTitle}
+              </div>
+              <div>
+                <strong>Company:</strong> {selectedApp.company}
+              </div>
+              <div>
+                <strong>Status:</strong>{" "}
+                <span className="capitalize">{selectedApp.status}</span>
+              </div>
+              <div>
+                <strong>Applied At:</strong>{" "}
+                {new Date(selectedApp.appliedAt).toLocaleString()}
+              </div>
+
+              {selectedApp.linkedin && (
+                <div>
+                  <strong>LinkedIn:</strong>{" "}
+                  <a
+                    href={selectedApp.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    View Profile
+                  </a>
+                </div>
+              )}
+
+              {selectedApp.portfolio && (
+                <div>
+                  <strong>Portfolio:</strong>{" "}
+                  <a
+                    href={selectedApp.portfolio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    View Portfolio
+                  </a>
+                </div>
+              )}
+
+              {selectedApp.coverLetter && (
+                <div>
+                  <strong>Cover Letter:</strong>
+                  <div className="bg-gray-100 p-3 rounded mt-1 whitespace-pre-line border text-sm font-mono">
+                    {selectedApp.coverLetter}
+                  </div>
+                </div>
+              )}
+
+              {selectedApp.resumePath && (
+                <div>
+                  <strong>Resume:</strong>{" "}
+                  <a
+                    href={`https://codesoft-job-board.onrender.com${selectedApp.resumePath}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    Download Resume
+                  </a>
+                </div>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => setSelectedApp(null)} color="primary">
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      )}
+    </section>
   );
 }

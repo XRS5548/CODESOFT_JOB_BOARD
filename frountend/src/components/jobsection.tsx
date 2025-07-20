@@ -72,9 +72,7 @@ export default function JobsSection() {
         )}
       </div>
 
-      <div className="flex justify-center mt-10">
-        <Pagination total={1} initialPage={1} onChange={(page) => console.log("Page:", page)} />
-      </div>
+      
     </section>
   );
 }

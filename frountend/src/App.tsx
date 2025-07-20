@@ -12,8 +12,10 @@ import NotFound from "./pages/404";
 import LoginPage from "./pages/login";
 import Signup from "./pages/signup";
 import JobDetailsPage from "./pages/JobDetailsPage";
+import { useEffect } from "react";
 
 function App() {
+ 
   return (
     <Routes>
       <Route element={<IndexPage />} path="/" />
@@ -22,8 +24,13 @@ function App() {
       <Route element={<BlogPage />} path="/blog" />
       <Route element={<AboutPage />} path="/about" />
       <Route element={<ApplyJob />} path="/apply/:id" />
-      <Route element={<SeekerDashboard />} path="/user" />
-      <Route element={<PosterDashboard />} path="/hr" />
+      {localStorage.getItem("token") && (<>
+        <Route element={<SeekerDashboard />} path="/user" />
+        <Route element={<PosterDashboard />} path="/hr" />
+      </>
+      )}
+
+      {/* Public Routes */}
       <Route element={<LoginPage />} path="/login" />
       <Route element={<Signup />} path="/register" />
       <Route element={<JobDetailsPage />} path="/jobs/:id" />
