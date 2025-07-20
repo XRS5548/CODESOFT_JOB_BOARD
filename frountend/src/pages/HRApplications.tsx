@@ -6,6 +6,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  addToast,
 } from "@heroui/react";
 import { Card, CardHeader, CardBody } from "@heroui/card";
 import { Select, SelectItem } from "@heroui/select";
@@ -74,6 +75,45 @@ export default function HRApplications() {
     fetchApplications();
   }, [token]);
 
+
+   const handleStatusChangeforSelectedApp = async (applicationId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`${API}setapplication`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, applicationId, status: newStatus }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update status");
+      
+      setApplications((prev) =>
+        prev.map((app) =>
+          app._id === applicationId ? { ...app, status: newStatus } : app
+        )
+      );
+      setSelectedApp((prev) =>
+        prev && prev._id === applicationId ? { ...prev, status: newStatus } : prev
+      );
+      addToast({
+        title: "Status Updated",
+        description: `Application status updated to ${newStatus}.`,
+        color: "success",
+      });
+
+    } catch (err: any) {
+      addToast({
+        title: "Error",
+        description: err.message,
+        color: "danger",
+      });
+    }
+  };
+
+
+
   const handleStatusChange = async (applicationId: string, newStatus: string) => {
     try {
       const res = await fetch(`${API}setapplication`, {
@@ -86,14 +126,23 @@ export default function HRApplications() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update status");
-
+      
       setApplications((prev) =>
         prev.map((app) =>
           app._id === applicationId ? { ...app, status: newStatus } : app
         )
       );
+      addToast({
+        title: "Status Updated",
+        description: `Application status updated to ${newStatus}.`,
+        color: "success",
+      });
     } catch (err: any) {
-      alert("❌ " + err.message);
+      addToast({
+        title: "Error",
+        description: err.message,
+        color: "danger",
+      });
     }
   };
 
@@ -104,7 +153,7 @@ export default function HRApplications() {
         <CardBody>
           {loading ? (
             <div className="flex justify-center py-6">
-              <Spinner size="lg" />
+              <Spinner variant="wave" size="lg" />
             </div>
           ) : error ? (
             <span className="text-red-500">{error}</span>
@@ -224,7 +273,7 @@ export default function HRApplications() {
               {selectedApp.coverLetter && (
                 <div>
                   <strong>Cover Letter:</strong>
-                  <div dangerouslySetInnerHTML={{__html:selectedApp.coverLetter}} className="bg-gray-100 p-3 rounded mt-1 whitespace-pre-line border text-sm font-mono">
+                  <div dangerouslySetInnerHTML={{ __html: selectedApp.coverLetter }} className=" p-3 rounded mt-1 whitespace-pre-line border text-sm font-mono">
                   </div>
                 </div>
               )}
@@ -243,7 +292,21 @@ export default function HRApplications() {
                 </div>
               )}
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter className="flex justify-between items-center">
+
+              <Select
+                size="sm"
+                variant="flat"
+                aria-label="Select status"
+                selectedKeys={[selectedApp.status]}
+                onChange={(e) =>
+                  handleStatusChangeforSelectedApp(selectedApp._id, e.target.value)
+                }
+              >
+                <SelectItem key="Applied">Applied</SelectItem>
+                <SelectItem key="Selected">Selected</SelectItem>
+                <SelectItem key="Rejected">Rejected</SelectItem>
+              </Select>
               <Button onClick={() => setSelectedApp(null)} color="primary">
                 Close
               </Button>

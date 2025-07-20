@@ -8,21 +8,17 @@ import HRApplications from "./HRApplications";
 // import { Select, SelectSection, SelectItem } from "@heroui/select";
 
 // 👇 Dummy Components
-const Overview = () => <div>📊 Overview coming soon...</div>;
 
 // My Jobs Section ----------------------------------------------------------------------------
 
 
 
-const Settings = () => <div>⚙️ Settings</div>;
 
 // 👇 Sidebar Menu List
 const menuList: { text: string; component: JSX.Element }[] = [
-  { text: "Dashboard", component: <Overview /> },
   { text: "My Jobs", component: <MyJobs /> },
   { text: "Add Job", component: <AddJob /> },
   { text: "All Applications", component: <HRApplications /> },
-  { text: "Settings", component: <Settings /> },
 
 ];
 

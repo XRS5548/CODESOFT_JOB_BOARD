@@ -12,6 +12,7 @@ import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css';
+import { Spinner } from "@heroui/spinner";
 
 type Job = {
     _id: string;
@@ -44,7 +45,10 @@ const MyJobs = () => {
         } catch (err) {
             console.error("❌ Error fetching jobs:", err);
         } finally {
+            setTimeout(() => {
             setLoading(false);
+                
+            }, 2000);
         }
     };
 
@@ -116,7 +120,9 @@ const MyJobs = () => {
             <h2 className="text-2xl font-bold mb-6">My Posted Jobs</h2>
 
             {loading ? (
-                <p>Loading...</p>
+                <div className="flex justify-center items-center py-10">
+                    <Spinner size="lg" variant="wave" />
+                </div>
             ) : jobs.length === 0 ? (
                 <p className="text-center text-gray-500">No jobs posted yet.</p>
             ) : (

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import {  Input, Button, Select, SelectItem } from "@heroui/react";
+import { Input, Button, Select, SelectItem, addToast } from "@heroui/react";
 import DefaultLayout from "@/layouts/default";
 import API from "@/config/API";
 
 export default function Signup() {
     const [submitted, setSubmitted] = useState(false);
+    
 
     const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -18,6 +19,15 @@ export default function Signup() {
         const confirmPassword = formData.get("password") as string;
         const role = formData.get("role") as string;
 
+        if(!role && role !== "0" && role !== "1") {
+            addToast({
+                title: "Invalid Role",
+                description: "Please select a valid role.",
+                color: "danger",
+            });
+            return;
+        }
+
         const payload = {
             name,
             email,
@@ -26,19 +36,40 @@ export default function Signup() {
             role,
         };
 
+        
+
         const xhr = new XMLHttpRequest();
         xhr.open("POST", API + "signup", true);
         xhr.setRequestHeader("Content-Type", "application/json"); // ✅ important
-
-        xhr.onload = () => {
-            console.log("Response:", xhr.responseText);
-            if (xhr.status === 200) {
-                localStorage.setItem("token", JSON.parse(xhr.responseText).token);
-                setSubmitted(true);
-            } else {
-                console.error("Signup failed:", xhr.responseText);
-            }
-        };
+        let prom = new Promise((resolve, reject) => {
+            xhr.onload = () => {
+                console.log("Response:", xhr.responseText);
+                if (xhr.status === 200) {
+                    localStorage.setItem("token", JSON.parse(xhr.responseText).token);
+                    setSubmitted(true);
+                    resolve("Signup successful!");
+                    addToast({
+                        title: "Signup Successful",
+                        description: "You can now log in.",
+                        color: "success",
+                    });
+                } else {
+                    console.error("Signup failed:", xhr.responseText);
+                    reject("Signup failed: " + xhr.responseText);
+                    addToast({
+                        title: "Signup Failed",
+                        description: "Please try again.",
+                        color: "danger",
+                    });
+                }
+            };
+        })
+        addToast({
+            title: "Please Wait",
+            description: "Connecting to server...",
+            promise: prom,
+            color: "default",
+        });
 
         xhr.onerror = () => {
             console.error("Network error during signup");
@@ -78,7 +109,7 @@ export default function Signup() {
                                 placeholder="Password"
                                 required
                             />
-                            <Select name="role" label="Select Role">
+                            <Select required name="role" label="Select Role">
                                 {["Job Seeker", "Hiring agent"].map((typ, index) => (
                                     <SelectItem key={index} textValue={typ}>
                                         {typ}

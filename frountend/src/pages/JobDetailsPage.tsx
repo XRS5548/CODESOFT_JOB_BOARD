@@ -1,6 +1,7 @@
 import DefaultLayout from "@/layouts/default";
 import { Spinner } from "@heroui/spinner";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 
 type Job = {
@@ -49,14 +50,34 @@ export default function JobDetailsPage() {
       } catch (err: any) {
         setError(err.message || "An unexpected error occurred.");
       } finally {
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+
+        }, 3000);
       }
     };
 
     fetchJobDetails();
   }, [id]);
 
-  if (loading) return <div className="p-4 text-center"> <Spinner /> Loading job details...</div>;
+  if (loading) return <DefaultLayout>
+    <div className="p-4 text-center flex justify-center flex-col gap-10 min-h-[70vh] items-center">
+      <div className="flex items-center flex-col  gap-2">
+        <Spinner variant="wave" size="lg" color="primary" />
+        <motion.div
+          className="text-xl font-semibold"
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          Fetching All details ...
+        </motion.div>
+      </div>
+    </div>
+  </DefaultLayout>;
   if (error) return <div className="p-4 text-center text-red-600">{error}</div>;
   if (!job) return <div className="p-4 text-center">❌ No job found.</div>;
 
@@ -74,7 +95,7 @@ export default function JobDetailsPage() {
         <div>
           <h2 className="text-xl font-semibold">📝 Job Description</h2>
           {/* <p  className="whitespace-pre-line">{job.description}</p> */}
-          <div dangerouslySetInnerHTML={{__html:job.description}}></div>
+          <div dangerouslySetInnerHTML={{ __html: job.description }}></div>
         </div>
 
         <p className="text-sm text-gray-500">

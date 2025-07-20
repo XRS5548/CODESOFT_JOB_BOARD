@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
+import { addToast } from "@heroui/react";
 
 export default function ApplyJob() {
   if (!localStorage.getItem("token")) {
-     location.href = "/login";
+    location.href = "/login";
   }
 
   const { id } = useParams();
@@ -57,20 +58,50 @@ export default function ApplyJob() {
 
     xhr.open("POST", "https://codesoft-job-board.onrender.com/api/apply", true);
 
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        setMessage("✅ Successfully applied to the job.");
-      } else {
-        const errData = JSON.parse(xhr.responseText);
-        setMessage(`❌ ${errData.error || "Failed to apply"}`);
-      }
-      setLoading(false);
-    };
+    let prom = new Promise((resolve, reject) => {
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          setMessage("✅ Successfully applied to the job.");
+          addToast({
+            title: "Application Submitted",
+            description: "Your application has been successfully submitted.",
+            color: "success",
+          });
+          resolve("Successfully applied to the job"); // optionally resolve here if needed
+        } else {
+          const errData = JSON.parse(xhr.responseText);
+          setMessage(`❌ ${errData.error || "Failed to apply"}`);
+          addToast({
+            title: "Application Failed",
+            description: errData.error || "Failed to apply for the job.",
+            color: "danger",
+          });
+          reject(errData); // optionally reject
+        }
+        setLoading(false);
+      };
 
-    xhr.onerror = function () {
-      setMessage("❌ Request failed");
-      setLoading(false);
-    };
+      xhr.onerror = function () {
+        setMessage("❌ Request failed");
+        setLoading(false);
+        addToast({
+          title: "Network Error",
+          description: "There was a problem with the network request.",
+          color: "danger",
+        });
+        reject(new Error("Request failed")); // optionally reject
+      };
+
+      xhr.send(formData); // don't forget to actually send the request
+    });
+
+    addToast({
+      title: "Applying to job...",
+      description: "Please wait while we submit your application.",
+      color: "primary",
+      promise:prom
+    })
+
 
     setLoading(true);
     xhr.send(formData);
