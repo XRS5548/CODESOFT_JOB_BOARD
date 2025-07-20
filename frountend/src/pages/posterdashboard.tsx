@@ -4,6 +4,7 @@ import DefaultLayout from "@/layouts/default";
 import {  Button } from "@heroui/react";
 import MyJobs from "@/components/Myjobs";
 import AddJob from "@/components/addjob";
+import HRApplications from "./HRApplications";
 // import { Select, SelectSection, SelectItem } from "@heroui/select";
 
 // 👇 Dummy Components
@@ -20,7 +21,9 @@ const menuList: { text: string; component: JSX.Element }[] = [
   { text: "Dashboard", component: <Overview /> },
   { text: "My Jobs", component: <MyJobs /> },
   { text: "Add Job", component: <AddJob /> },
+  { text: "All Applications", component: <HRApplications /> },
   { text: "Settings", component: <Settings /> },
+
 ];
 
 export default function PosterDashboard() {

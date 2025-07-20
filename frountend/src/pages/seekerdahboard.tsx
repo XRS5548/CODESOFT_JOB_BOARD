@@ -19,15 +19,17 @@ export default function SeekerDashboard() {
       const token = localStorage.getItem("token");
       if (!token) {
         setError("❌ No token found. Please login.");
+        setLoading(false);
         return;
       }
 
       try {
         const res = await fetch("https://codesoft-job-board.onrender.com/api/applications", {
-          method: "GET",
+          method: "POST", // ⬅️ Token in body, so using POST
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({ token }),
         });
 
         const data = await res.json();
@@ -56,7 +58,7 @@ export default function SeekerDashboard() {
 
         {!loading && !error && (
           <>
-            {/* Stats */}
+            {/* Stats Section */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="p-6 border rounded-xl shadow-sm">
                 <h3 className="text-lg font-medium mb-2">Jobs Applied</h3>
