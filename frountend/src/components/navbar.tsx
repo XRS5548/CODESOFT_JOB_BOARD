@@ -143,7 +143,7 @@ export const Navbar = () => {
         </NavbarItem>
 
         {/* Search Input (only on lg screens) */}
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        {/* <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem> */}
 
         {/* Sponsor Button */}
         <NavbarItem className="hidden md:flex">
