@@ -151,7 +151,7 @@ router.post("/extracttoken", (req, res) => {
 });
 
 
-router.get("/jobs/token", UserauthMiddleware, async (req, res) => {
+router.post("/jobs/token", UserauthMiddleware, async (req, res) => {
   try {
     const db = client.db("jobboard");
     const jobsCollection = db.collection("jobs");

@@ -1,4 +1,4 @@
-import  { useState, FormEvent } from 'react';
+import { useState, FormEvent } from "react";
 import { Select, SelectItem } from "@heroui/select";
 import { Form, Input, Button, Textarea } from "@heroui/react";
 
@@ -22,9 +22,11 @@ export default function AddJob() {
     description: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const jobTypes = ["Full-Time", "Part-Time", "Internship", "Remote", "Freelance"];
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const newErrors: FormErrors = {};
@@ -34,10 +36,52 @@ export default function AddJob() {
     if (!formData.description) newErrors.description = "Job description is required";
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-    if (Object.keys(newErrors).length === 0) {
-      console.log("Job submitted:", formData);
-      alert("Job posted successfully!");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login first to post a job.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("https://codesoft-job-board.onrender.com/api/createjob", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          company: formData.company,
+          location: formData.location,
+          type: formData.jobType,
+          description: formData.description,
+          salary: "",
+          token: token, // 👈 Token is sent in body
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("✅ Job posted successfully!");
+        setFormData({
+          title: "",
+          company: "",
+          location: "",
+          jobType: "",
+          description: "",
+        });
+      } else {
+        alert(`❌ Failed to post job: ${data?.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error("Error posting job:", err);
+      alert("❌ Something went wrong. Try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,11 +93,7 @@ export default function AddJob() {
     <div className="max-w-xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">📝 Post a New Job</h1>
 
-      <Form
-        className="w-full flex flex-col gap-4"
-        validationErrors={errors}
-        onSubmit={onSubmit}
-      >
+      <Form className="w-full flex flex-col gap-4" validationErrors={errors} onSubmit={onSubmit}>
         <Input
           label="Job Title"
           name="title"
@@ -105,8 +145,8 @@ export default function AddJob() {
           labelPlacement="outside"
         />
 
-        <Button type="submit" color="primary" variant="solid">
-          Post Job
+        <Button type="submit" color="primary" variant="solid" isLoading={loading}>
+          {loading ? "Posting..." : "Post Job"}
         </Button>
       </Form>
     </div>
