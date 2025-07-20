@@ -1,10 +1,15 @@
 import {
-    Table, TableHeader, TableBody, TableColumn,
-    TableRow, TableCell,
+    Table,
+    TableHeader,
+    TableBody,
+    TableColumn,
+    TableRow,
+    TableCell,
 } from "@heroui/table";
 import { Button } from "@heroui/button";
 import { useEffect, useState } from "react";
-import { Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/react";
+import { Input } from "@heroui/input";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 
 type Job = {
     _id: string;
@@ -13,13 +18,12 @@ type Job = {
     createdAt?: string;
 };
 
-const API = "https://codesoft-job-board.onrender.com/api/";
-
 const MyJobs = () => {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [editingJob, setEditingJob] = useState<Job | null>(null);
+    const [newTitle, setNewTitle] = useState("");
+    const [newDescription, setNewDescription] = useState("");
 
     const token = localStorage.getItem("token");
 
@@ -27,7 +31,7 @@ const MyJobs = () => {
         if (!token) return;
 
         try {
-            const res = await fetch(`${API}jobs/token`, {
+            const res = await fetch("https://codesoft-job-board.onrender.com/api/jobs/token", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token }),
@@ -36,7 +40,7 @@ const MyJobs = () => {
             const data = await res.json();
             setJobs(data);
         } catch (err) {
-            console.error("Error fetching user jobs:", err);
+            console.error("❌ Error fetching jobs:", err);
         } finally {
             setLoading(false);
         }
@@ -46,54 +50,62 @@ const MyJobs = () => {
         fetchJobs();
     }, []);
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this job?")) return;
-
+    const deleteJob = async (jobId: string) => {
         try {
-            const res = await fetch(`${API}jobs/${id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const res = await fetch(`https://codesoft-job-board.onrender.com/api/jobs/delete`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, jobId }),
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to delete");
-
-            setJobs((prev) => prev.filter((job) => job._id !== id));
+            if (res.ok) {
+                setJobs(jobs.filter((job) => job._id !== jobId));
+                alert("✅ Job deleted successfully");
+            } else {
+                alert("❌ " + data.error);
+            }
         } catch (err) {
-            alert("❌ " + err.message);
+            console.error("❌ Error deleting job:", err);
         }
     };
 
-    const handleEdit = (job: Job) => {
-        setSelectedJob(job);
-        onOpen();
+    const openEditModal = (job: Job) => {
+        setEditingJob(job);
+        setNewTitle(job.title);
+        setNewDescription(job.description);
     };
 
-    const handleUpdate = async () => {
-        if (!selectedJob) return;
+    const saveEdit = async () => {
+        if (!editingJob) return;
 
         try {
-            const res = await fetch(`${API}jobs/${selectedJob._id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+            const res = await fetch(`https://codesoft-job-board.onrender.com/api/jobs/edit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    title: selectedJob.title,
-                    description: selectedJob.description,
+                    token,
+                    jobId: editingJob._id,
+                    title: newTitle,
+                    description: newDescription,
                 }),
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to update");
-
-            fetchJobs();
-            onClose();
+            if (res.ok) {
+                setJobs((prev) =>
+                    prev.map((job) =>
+                        job._id === editingJob._id
+                            ? { ...job, title: newTitle, description: newDescription }
+                            : job
+                    )
+                );
+                setEditingJob(null);
+            } else {
+                alert("❌ " + data.error);
+            }
         } catch (err) {
-            alert("❌ " + err.message);
+            console.error("❌ Error editing job:", err);
         }
     };
 
@@ -125,12 +137,12 @@ const MyJobs = () => {
                                         : "—"}
                                 </TableCell>
                                 <TableCell>
-                                    <Button color="warning" size="sm" onClick={() => handleEdit(job)}>
+                                    <Button color="warning" size="sm" onClick={() => openEditModal(job)}>
                                         Edit
                                     </Button>
                                 </TableCell>
                                 <TableCell>
-                                    <Button color="danger" size="sm" onClick={() => handleDelete(job._id)}>
+                                    <Button color="danger" size="sm" onClick={() => deleteJob(job._id)}>
                                         Delete
                                     </Button>
                                 </TableCell>
@@ -140,24 +152,25 @@ const MyJobs = () => {
                 </Table>
             )}
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            {/* Edit Modal */}
+            <Modal isOpen={!!editingJob} onClose={() => setEditingJob(null)}>
                 <ModalContent>
                     <ModalHeader>Edit Job</ModalHeader>
                     <ModalBody>
                         <Input
                             label="Title"
-                            value={selectedJob?.title || ""}
-                            onChange={(e) => setSelectedJob({ ...selectedJob!, title: e.target.value })}
+                            value={newTitle}
+                            onChange={(e) => setNewTitle(e.target.value)}
                         />
                         <Input
                             label="Description"
-                            value={selectedJob?.description || ""}
-                            onChange={(e) => setSelectedJob({ ...selectedJob!, description: e.target.value })}
+                            value={newDescription}
+                            onChange={(e) => setNewDescription(e.target.value)}
                         />
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="default" variant="light" onClick={onClose}>Cancel</Button>
-                        <Button color="primary" onClick={handleUpdate}>Save</Button>
+                        <Button onClick={() => setEditingJob(null)} variant="ghost">Cancel</Button>
+                        <Button onClick={saveEdit} color="primary">Save</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
