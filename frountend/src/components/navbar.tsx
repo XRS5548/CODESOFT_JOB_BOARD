@@ -115,8 +115,8 @@ export const Navbar = () => {
             color="foreground"
             href="/"
           >
-            <Logo />
-            <p className="font-bold text-inherit">ACME</p>
+            <img src="/logo.png" width="40px" alt="" />
+            <p className="font-bold text-3xl text-inherit flex items-center">JOB BOSS</p>
           </Link>
         </NavbarBrand>
 

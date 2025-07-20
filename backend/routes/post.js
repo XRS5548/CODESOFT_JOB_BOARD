@@ -445,7 +445,7 @@ router.post("/jobs/delete", UserauthMiddleware, async (req, res) => {
     const db = client.db("jobboard");
     const jobsCollection = db.collection("jobs");
 
-    const job = await jobsCollection.findOne({ _id: new ObjectId(jobId), userId });
+    const job = await jobsCollection.findOne({ _id: new ObjectId(jobId), user: userId });
 
     if (!job) return res.status(404).json({ error: "Job not found or not authorized" });
 
@@ -463,7 +463,7 @@ router.post("/jobs/edit", UserauthMiddleware, async (req, res) => {
     const jobsCollection = db.collection("jobs");
 
     const result = await jobsCollection.updateOne(
-        { _id: new ObjectId(jobId), userId },
+        { _id: new ObjectId(jobId), user:userId },
         { $set: { title, description } }
     );
 
