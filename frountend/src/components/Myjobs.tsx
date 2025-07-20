@@ -130,7 +130,11 @@ const MyJobs = () => {
                         {jobs.map((job) => (
                             <TableRow key={job._id}>
                                 <TableCell>{job.title}</TableCell>
-                                <TableCell>{job.description}</TableCell>
+                                <TableCell>
+                                    {job.description.length > 60
+                                        ? job.description.substring(0, 60) + "..."
+                                        : job.description}
+                                </TableCell>
                                 <TableCell>
                                     {job.createdAt
                                         ? new Date(job.createdAt).toLocaleDateString()
@@ -162,11 +166,14 @@ const MyJobs = () => {
                             value={newTitle}
                             onChange={(e) => setNewTitle(e.target.value)}
                         />
-                        <Input
-                            label="Description"
+                        <label className="text-sm font-medium mt-4 block">Description</label>
+                        <textarea
+                            className="w-full border rounded-lg p-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            rows={4}
+                            placeholder="Job Description"
                             value={newDescription}
                             onChange={(e) => setNewDescription(e.target.value)}
-                        />
+                        ></textarea>
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => setEditingJob(null)} variant="ghost">Cancel</Button>
