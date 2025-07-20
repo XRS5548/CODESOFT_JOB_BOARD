@@ -2,57 +2,16 @@ import { useState } from "react";
 import DefaultLayout from "@/layouts/default";
 // import JobsSection from "@/components/jobsection";
 import {  Button } from "@heroui/react";
-// import { Select, SelectSection, SelectItem } from "@heroui/select";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-} from "@heroui/table";
+import MyJobs from "@/components/Myjobs";
 import AddJob from "@/components/addjob";
+// import { Select, SelectSection, SelectItem } from "@heroui/select";
 
 // 👇 Dummy Components
 const Overview = () => <div>📊 Overview coming soon...</div>;
 
 // My Jobs Section ----------------------------------------------------------------------------
-const MyJobs = () => {
-  return (
-    <div className="overflow-auto">
-      <Table aria-label="My Posted Jobs">
-        <TableHeader>
-          <TableColumn>Title</TableColumn>
-          <TableColumn>Description</TableColumn>
-          <TableColumn>Created At</TableColumn>
-          <TableColumn>Edit</TableColumn>
-          <TableColumn>Delete</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {[...Array(5)].map((_, index) => (
-            <TableRow key={index}>
-              <TableCell>Software Engineer Intern</TableCell>
-              <TableCell>
-                A software intern program requiring knowledge of Java, Python, etc.
-              </TableCell>
-              <TableCell>25/07/2025</TableCell>
-              <TableCell>
-                <Button color="warning" size="sm">
-                  Edit
-                </Button>
-              </TableCell>
-              <TableCell>
-                <Button color="danger" size="sm">
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
-};
+
+
 
 const Settings = () => <div>⚙️ Settings</div>;
 
