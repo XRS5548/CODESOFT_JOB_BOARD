@@ -22,6 +22,7 @@
     "@heroui/react": "^2.8.1",
     "@heroui/select": "^2.4.24",
     "@heroui/snippet": "2.2.24",
+    "@heroui/spinner": "^2.2.20",
     "@heroui/switch": "2.2.21",
     "@heroui/system": "2.4.19",
     "@heroui/table": "^2.2.23",
