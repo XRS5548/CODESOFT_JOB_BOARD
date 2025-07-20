@@ -321,4 +321,44 @@ router.post("/apply", UserauthMiddleware, async (req, res) => {
   }
 });
 
+router.get("/applications", UserauthMiddleware, async (req, res) => {
+  const userId = req.user; // Extracted from token by UserauthMiddleware
+
+  try {
+    const db = client.db("jobboard");
+    const applicationsCollection = db.collection("applications");
+    const jobsCollection = db.collection("jobs");
+
+    // ✅ Get user's applications
+    const applications = await applicationsCollection
+      .find({ userId: new ObjectId(userId) })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // ✅ Fetch related job info for each application
+    const detailedApplications = await Promise.all(
+      applications.map(async (app) => {
+        const job = await jobsCollection.findOne({ _id: new ObjectId(app.jobId) });
+        return {
+          _id: app._id,
+          jobId: app.jobId,
+          jobTitle: job?.title || "Job Title Not Found",
+          company: job?.company || "Unknown Company",
+          status: app.status || "Applied",
+          appliedAt: app.createdAt,
+          resumeUrl: `/uploads/${app.resume?.filename || "not_found.pdf"}`, // if you saved file to disk
+        };
+      })
+    );
+
+    res.status(200).json({ applications: detailedApplications });
+  } catch (err) {
+    console.error("❌ Error fetching applications:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
 module.exports = router;
