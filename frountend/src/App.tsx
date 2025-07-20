@@ -1,40 +1,60 @@
-import { Route, Routes } from "react-router-dom";
+import DefaultLayout from "@/layouts/default";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-import IndexPage from "@/pages/index";
-import DocsPage from "@/pages/docs";
-import PricingPage from "@/pages/pricing";
-import BlogPage from "@/pages/blog";
-import AboutPage from "@/pages/about";
-import ApplyJob from "@/pages/ApplyJob";
-import SeekerDashboard from "@/pages/seekerdahboard";
-import PosterDashboard from "./pages/posterdashboard";
-import NotFound from "./pages/404";
-import LoginPage from "./pages/login";
-import Signup from "./pages/signup";
-import JobDetailsPage from "./pages/JobDetailsPage";
+export default function ApplyJob() {
+    const { id } = useParams(); // job ID from URL
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
 
-function App() {
-  return (
-    <Routes>
-      <Route element={<IndexPage />} path="/" />
-      <Route element={<DocsPage />} path="/docs" />
-      <Route element={<PricingPage />} path="/pricing" />
-      <Route element={<BlogPage />} path="/blog" />
-      <Route element={<AboutPage />} path="/about" />
-      <Route element={<ApplyJob />} path="/apply" />
-      <Route element={<SeekerDashboard />} path="/user" />
-      <Route element={<PosterDashboard />} path="/hr" />
-      <Route element={<LoginPage />} path="/login" />
-      <Route element={<Signup />} path="/register" />
-      <Route element={<JobDetailsPage />} path="/jobs/:id" />
+    const handleApply = async () => {
+        const token = localStorage.getItem("token");
 
+        if (!token || !id) {
+            setMessage("Missing token or job ID.");
+            return;
+        }
 
-      <Route element={<NotFound />} path="*" />
+        setLoading(true);
+        try {
+            const res = await fetch(`https://codesoft-job-board.onrender.com/api/apply`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token, jobId: id }),
+            });
 
+            const data = await res.json();
 
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to apply.");
+            }
 
-    </Routes>
-  );
+            setMessage("✅ Successfully applied for the job.");
+        } catch (err: any) {
+            setMessage(`❌ ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <DefaultLayout>
+            <div className="max-w-md mx-auto p-6 space-y-4 text-center">
+                <h1 className="text-2xl font-bold">Apply for Job</h1>
+                <p>Job ID: <code>{id}</code></p>
+
+                <button
+                    className="px-4 py-2 border rounded hover:bg-black hover:text-white transition"
+                    onClick={handleApply}
+                    disabled={loading}
+                >
+                    {loading ? "Applying..." : "Submit Application"}
+                </button>
+
+                {message && <p>{message}</p>}
+            </div>
+        </DefaultLayout>
+    );
 }
-
-export default App;

@@ -245,4 +245,42 @@ router.get("/jobs/:id", async (req, res) => {
 });
 
 
+router.post("/apply", UserauthMiddleware, async (req, res) => {
+  const userId = req.user; // From token
+  const { jobId } = req.body;
+
+  if (!jobId) {
+    return res.status(400).json({ error: "Job ID is required" });
+  }
+
+  try {
+    const db = client.db("jobboard");
+    const jobsCollection = db.collection("jobs");
+
+    const job = await jobsCollection.findOne({ _id: new ObjectId(jobId) });
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Prevent duplicate application
+    const alreadyApplied = job.applications?.includes(userId);
+    if (alreadyApplied) {
+      return res.status(400).json({ error: "You already applied to this job" });
+    }
+
+    // Update job document to add user to applications
+    await jobsCollection.updateOne(
+      { _id: new ObjectId(jobId) },
+      { $addToSet: { applications: userId } } // $addToSet prevents duplicates
+    );
+
+    res.status(200).json({ message: "Applied successfully" });
+  } catch (error) {
+    console.error("Error applying to job:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
 module.exports = router;
