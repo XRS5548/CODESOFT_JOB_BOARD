@@ -3,6 +3,7 @@
 const express = require("express");
 const cors = require("cors");
 const post = require("./routes/post");
+const fileupload = require("express-fileupload");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +20,9 @@ app.use("/api", post);
 
 // Static Files
 app.use(express.static("public"));
+app.use(fileupload({
+  createParentPath: true
+}));
 
 
 

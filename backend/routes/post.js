@@ -9,6 +9,9 @@ const bcrypt = require('bcrypt');
 const UserauthMiddleware = require('../utils/AuthMiddleware');
 dotenv.config();
 
+const path = require("path");
+const fs = require("fs");
+
 const client = new MongoClient(mongoUri);
 let conn = client.connect(function (err) {
     throw err;
@@ -246,25 +249,37 @@ router.get("/jobs/:id", async (req, res) => {
 
 
 router.post("/apply", UserauthMiddleware, async (req, res) => {
-  const userId = req.user; // From token
-  const {
-    jobId,
-    name,
-    email,
-    phone,
-    linkedin,
-    portfolio,
-    coverLetter,
-  } = req.body;
-
-  const resume = req.files?.resume;
-
-  // Validate inputs
-  if (!jobId || !name || !email || !phone || !linkedin || !coverLetter || !resume) {
-    return res.status(400).json({ error: "❌ Missing required fields or resume file." });
-  }
-
   try {
+    const userId = req.user;
+
+    const {
+      jobId,
+      name,
+      email,
+      phone,
+      linkedin,
+      portfolio,
+      coverLetter,
+    } = req.body;
+
+    const resume = req.files?.resume;
+
+    // ✅ Validate required fields
+    if (!jobId || !name || !email || !phone || !linkedin || !coverLetter || !resume) {
+      return res.status(400).json({ error: "❌ Missing required fields or resume." });
+    }
+
+    // ✅ File path config
+    const resumeDir = path.join(__dirname, "..", "public", "resumes");
+    if (!fs.existsSync(resumeDir)) fs.mkdirSync(resumeDir, { recursive: true });
+
+    const fileExt = path.extname(resume.name);
+    const fileName = `${Date.now()}_${userId}${fileExt}`;
+    const savePath = path.join(resumeDir, fileName);
+
+    // ✅ Move file to disk
+    await resume.mv(savePath);
+
     const db = client.db("jobboard");
     const jobsCollection = db.collection("jobs");
     const applicationsCollection = db.collection("applications");
@@ -283,7 +298,7 @@ router.post("/apply", UserauthMiddleware, async (req, res) => {
       return res.status(400).json({ error: "❌ You already applied to this job" });
     }
 
-    // ✅ Save application
+    // ✅ Store application with file path
     const applicationData = {
       jobId: new ObjectId(jobId),
       userId: new ObjectId(userId),
@@ -293,11 +308,7 @@ router.post("/apply", UserauthMiddleware, async (req, res) => {
       linkedin,
       portfolio,
       coverLetter,
-      resume: {
-        name: resume.name,
-        mimetype: resume.mimetype,
-        data: resume.data, // 👈 File buffer stored in DB
-      },
+      resumePath: `/resumes/${fileName}`, // 👈 relative URL for frontend
       createdAt: new Date(),
     };
 
@@ -305,10 +316,9 @@ router.post("/apply", UserauthMiddleware, async (req, res) => {
 
     res.status(200).json({ message: "✅ Successfully applied to the job." });
   } catch (err) {
-    console.error("❌ Error applying to job:", err);
+    console.error("❌ Error applying to job:", err.stack || err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 module.exports = router;
