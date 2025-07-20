@@ -1,4 +1,5 @@
 import DefaultLayout from "@/layouts/default";
+import { Spinner } from "@heroui/spinner";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -55,7 +56,7 @@ export default function JobDetailsPage() {
     fetchJobDetails();
   }, [id]);
 
-  if (loading) return <div className="p-4 text-center">⏳ Loading job details...</div>;
+  if (loading) return <div className="p-4 text-center"> <Spinner /> Loading job details...</div>;
   if (error) return <div className="p-4 text-center text-red-600">{error}</div>;
   if (!job) return <div className="p-4 text-center">❌ No job found.</div>;
 
