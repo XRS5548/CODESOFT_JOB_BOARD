@@ -321,7 +321,7 @@ router.post("/apply", UserauthMiddleware, async (req, res) => {
   }
 });
 
-router.get("/applications", UserauthMiddleware, async (req, res) => {
+router.post("/applications", UserauthMiddleware, async (req, res) => {
   const userId = req.user; // Extracted from token by UserauthMiddleware
 
   try {
