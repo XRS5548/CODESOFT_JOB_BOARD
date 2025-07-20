@@ -11,6 +11,7 @@ import PosterDashboard from "./pages/posterdashboard";
 import NotFound from "./pages/404";
 import LoginPage from "./pages/login";
 import Signup from "./pages/signup";
+import JobDetailsPage from "./pages/JobDetailsPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route element={<PosterDashboard />} path="/hr" />
       <Route element={<LoginPage />} path="/login" />
       <Route element={<Signup />} path="/register" />
+      <Route element={<JobDetailsPage />} path="/jobs/:id" />
 
 
       <Route element={<NotFound />} path="*" />
