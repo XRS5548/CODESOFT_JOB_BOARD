@@ -31,6 +31,10 @@ export const siteConfig = {
       label: "About",
       href: "/about",
     },
+    {
+      label: "Login",
+      href: "/login",
+    },
   ],
   links: {
     github: "https://github.com/XRS5548",
