@@ -12,7 +12,6 @@ import NotFound from "./pages/404";
 import LoginPage from "./pages/login";
 import Signup from "./pages/signup";
 import JobDetailsPage from "./pages/JobDetailsPage";
-import { useEffect } from "react";
 
 function App() {
  

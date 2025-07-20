@@ -72,7 +72,8 @@ export default function JobDetailsPage() {
 
         <div>
           <h2 className="text-xl font-semibold">📝 Job Description</h2>
-          <p className="whitespace-pre-line">{job.description}</p>
+          {/* <p  className="whitespace-pre-line">{job.description}</p> */}
+          <div dangerouslySetInnerHTML={{__html:job.description}}></div>
         </div>
 
         <p className="text-sm text-gray-500">

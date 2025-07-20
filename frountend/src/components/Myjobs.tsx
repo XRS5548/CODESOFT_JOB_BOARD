@@ -10,6 +10,8 @@ import { Button } from "@heroui/button";
 import { useEffect, useState } from "react";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import ReactQuill from "react-quill";
+import 'react-quill/dist/quill.snow.css';
 
 type Job = {
     _id: string;
@@ -157,8 +159,8 @@ const MyJobs = () => {
             )}
 
             {/* Edit Modal */}
-            <Modal isOpen={!!editingJob} onClose={() => setEditingJob(null)}>
-                <ModalContent>
+            <Modal size="full" className="w-[100vw]" isOpen={!!editingJob} onClose={() => setEditingJob(null)}>
+                <ModalContent >
                     <ModalHeader>Edit Job</ModalHeader>
                     <ModalBody>
                         <Input
@@ -167,13 +169,14 @@ const MyJobs = () => {
                             onChange={(e) => setNewTitle(e.target.value)}
                         />
                         <label className="text-sm font-medium mt-4 block">Description</label>
-                        <textarea
+                        <ReactQuill style={{height:"600px"}} theme="snow" value={newDescription} onChange={(e) => setNewDescription(e)} />
+                        {/* <textarea
                             className="w-full border rounded-lg p-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             rows={4}
                             placeholder="Job Description"
                             value={newDescription}
                             onChange={(e) => setNewDescription(e.target.value)}
-                        ></textarea>
+                        ></textarea> */}
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={() => setEditingJob(null)} variant="ghost">Cancel</Button>

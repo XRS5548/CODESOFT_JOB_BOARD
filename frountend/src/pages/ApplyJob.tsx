@@ -1,6 +1,9 @@
 import DefaultLayout from "@/layouts/default";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import ReactQuill from "react-quill";
+import { Input } from "@heroui/input";
+import { Button } from "@heroui/button";
 
 export default function ApplyJob() {
   const { id } = useParams();
@@ -77,73 +80,72 @@ export default function ApplyJob() {
         <p className="text-center mb-6 text-gray-500">Job ID: <code>{id}</code></p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
+          <Input
             type="text"
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border p-2 rounded"
             required
           />
 
-          <input
+          <Input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border p-2 rounded"
             required
           />
 
-          <input
+          <Input
             type="text"
             placeholder="Phone Number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full border p-2 rounded"
             required
           />
 
-          <input
+          <Input
             type="url"
             placeholder="LinkedIn Profile"
             value={linkedin}
             onChange={(e) => setLinkedin(e.target.value)}
-            className="w-full border p-2 rounded"
             required
           />
 
-          <input
+          <Input
             type="url"
             placeholder="Portfolio Website (optional)"
             value={portfolio}
             onChange={(e) => setPortfolio(e.target.value)}
-            className="w-full border p-2 rounded"
           />
 
-          <textarea
+          <ReactQuill placeholder="Cover Letter" value={coverLetter} onChange={setCoverLetter} style={{ height: "240px" }} />
+          {/* <textarea
             placeholder="Cover Letter"
             value={coverLetter}
             onChange={(e) => setCoverLetter(e.target.value)}
             className="w-full border p-2 rounded h-32"
             required
-          />
-
-          <input
+          /> */}
+          <div className="mt-15"></div>
+          <label htmlFor="file">Upload Resume </label>
+          <Input type="file" required accept=".pdf" onChange={(e) => setResume(e.target.files?.[0] || null)} />
+          {/* <input
             type="file"
             accept=".pdf"
             onChange={(e) => setResume(e.target.files?.[0] || null)}
-            className="w-full border p-2 rounded"
+            className="w-full border my-3 p-2 rounded"
             required
-          />
+          /> */}
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full border p-2 rounded hover:bg-black hover:text-white transition"
+            color="danger"
+            className="w-full mt-4"
           >
             {loading ? "Submitting..." : "Submit Application"}
-          </button>
+          </Button>
 
           {message && <p className="text-center mt-2">{message}</p>}
         </form>

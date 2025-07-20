@@ -164,7 +164,7 @@ export default function HRApplications() {
 
       {/* Modal for Application Details */}
       {selectedApp && (
-        <Modal isOpen={!!selectedApp} onClose={() => setSelectedApp(null)}>
+        <Modal size="5xl" isOpen={!!selectedApp} onClose={() => setSelectedApp(null)}>
 
           <ModalContent className="max-h-[90vh] overflow-auto">
             <ModalHeader>Application Detail</ModalHeader>
@@ -224,8 +224,7 @@ export default function HRApplications() {
               {selectedApp.coverLetter && (
                 <div>
                   <strong>Cover Letter:</strong>
-                  <div className="bg-gray-100 p-3 rounded mt-1 whitespace-pre-line border text-sm font-mono">
-                    {selectedApp.coverLetter}
+                  <div dangerouslySetInnerHTML={{__html:selectedApp.coverLetter}} className="bg-gray-100 p-3 rounded mt-1 whitespace-pre-line border text-sm font-mono">
                   </div>
                 </div>
               )}

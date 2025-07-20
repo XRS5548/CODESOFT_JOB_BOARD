@@ -1,6 +1,5 @@
 // components/JobsSection.tsx
 import { useEffect, useState } from "react";
-import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/react";
 
 type Job = {
