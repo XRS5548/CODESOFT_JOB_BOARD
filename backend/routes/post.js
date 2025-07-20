@@ -438,4 +438,52 @@ router.post("/setapplication", UserauthMiddleware, async (req, res) => {
 });
 
 
+// DELETE /api/jobs/:id
+router.delete("/jobs/:id", UserauthMiddleware, async (req, res) => {
+  try {
+    const db = client.db("jobboard");
+    const userId = req.user;
+
+    const jobsCollection = db.collection("jobs");
+    const job = await jobsCollection.findOne({ _id: new ObjectId(req.params.id) });
+
+    if (!job || job.userId !== userId) {
+      return res.status(403).json({ error: "Unauthorized or Job not found" });
+    }
+
+    await jobsCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ message: "✅ Job deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting job:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.put("/jobs/:id", UserauthMiddleware, async (req, res) => {
+  try {
+    const db = client.db("jobboard");
+    const userId = req.user;
+    const { title, description } = req.body;
+
+    const jobsCollection = db.collection("jobs");
+
+    const job = await jobsCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (!job || job.userId !== userId) {
+      return res.status(403).json({ error: "Unauthorized or Job not found" });
+    }
+
+    await jobsCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: { title, description } }
+    );
+
+    res.json({ message: "✅ Job updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating job:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
 module.exports = router;
