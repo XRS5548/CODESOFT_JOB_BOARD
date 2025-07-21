@@ -24,6 +24,7 @@ const menuList: { text: string; component: JSX.Element }[] = [
 
 export default function PosterDashboard() {
   const [activeIndex, setActiveIndex] = useState(0); // Default active section
+  if(!localStorage.getItem('token') || localStorage.getItem("token") ==='') window.location.replace("/login")
 
   return (
     <DefaultLayout>

@@ -14,7 +14,7 @@ import Signup from "./pages/signup";
 import JobDetailsPage from "./pages/JobDetailsPage";
 
 function App() {
- 
+
   return (
     <Routes>
       <Route element={<IndexPage />} path="/" />
@@ -23,11 +23,11 @@ function App() {
       <Route element={<BlogPage />} path="/blog" />
       <Route element={<AboutPage />} path="/about" />
       <Route element={<ApplyJob />} path="/apply/:id" />
-      {localStorage.getItem("token") && (<>
-        <Route element={<SeekerDashboard />} path="/user" />
-        <Route element={<PosterDashboard />} path="/hr" />
-      </>
-      )}
+
+      <Route element={<SeekerDashboard />} path="/user" />
+      <Route element={<PosterDashboard />} path="/hr" />
+
+
 
       {/* Public Routes */}
       <Route element={<LoginPage />} path="/login" />

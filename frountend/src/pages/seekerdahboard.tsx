@@ -11,6 +11,8 @@ interface Application {
 }
 
 export default function SeekerDashboard() {
+  if(!localStorage.getItem('token') || localStorage.getItem("token") ==='') window.location.replace("/login")
+
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
