@@ -366,23 +366,33 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
     const userId = req.user;
 
     const usersCollection = db.collection("users");
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const jobsCollection = db.collection("jobs");
+    const applicationsCollection = db.collection("applications");
 
+    // ✅ Check if user exists and is HR
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     if (!user || user.role !== "1") {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    const applicationsCollection = db.collection("applications");
-    const jobsCollection = db.collection("jobs");
+    // ✅ Get jobs posted by this HR
+    const myJobs = await jobsCollection.find({ user: new ObjectId(userId) }).toArray();
+    const jobIds = myJobs.map(job => job._id);
 
+    if (jobIds.length === 0) {
+      return res.json({ applications: [] }); // No jobs posted by HR yet
+    }
+
+    // ✅ Get all applications for these jobs
     const applications = await applicationsCollection
-      .find({})
+      .find({ jobId: { $in: jobIds } })
       .sort({ createdAt: -1 })
       .toArray();
 
+    // ✅ Format applications with job info
     const formatted = await Promise.all(
       applications.map(async (app) => {
-        const job = await jobsCollection.findOne({ _id: new ObjectId(app.jobId) });
+        const job = myJobs.find(j => j._id.toString() === app.jobId.toString());
 
         return {
           _id: app._id,
@@ -394,7 +404,6 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
           status: app.status || "Applied",
           appliedAt: app.createdAt,
 
-          // ✅ Add these:
           linkedin: app.linkedin || "",
           portfolio: app.portfolio || "",
           coverLetter: app.coverLetter || "",
@@ -409,7 +418,6 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 
 
