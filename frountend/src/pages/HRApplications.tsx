@@ -19,7 +19,7 @@ import {
   ModalHeader,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import API from "@/config/API";
+
 
 interface Application {
   _id: string;

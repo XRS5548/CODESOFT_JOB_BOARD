@@ -19,7 +19,7 @@ export default function JobsSection() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch("https://codesoft-job-board.onrender.com/api/jobs");
+        const response = await fetch(API+"jobs");
         const data = await response.json();
         setJobs(data);
       } catch (error) {

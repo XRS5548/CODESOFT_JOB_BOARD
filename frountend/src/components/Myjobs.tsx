@@ -34,7 +34,7 @@ const MyJobs = () => {
         if (!token) return;
 
         try {
-            const res = await fetch("https://codesoft-job-board.onrender.com/api/jobs/token", {
+            const res = await fetch(API+"jobs/token", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token }),

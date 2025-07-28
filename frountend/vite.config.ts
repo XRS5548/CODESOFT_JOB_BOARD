@@ -7,6 +7,6 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), tailwindcss()],
   define: {
-    API: JSON.stringify("https://codesoft-job-board.onrender.com/api/")
+    API: JSON.stringify("http://localhost:5000/api/")
   }
 });

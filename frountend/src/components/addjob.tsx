@@ -47,7 +47,7 @@ export default function AddJob() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://codesoft-job-board.onrender.com/api/createjob", {
+      const res = await fetch(API+"createjob", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

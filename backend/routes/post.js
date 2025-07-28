@@ -376,7 +376,7 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
     }
 
     // ✅ Get jobs posted by this HR
-    const myJobs = await jobsCollection.find({ user: new ObjectId(userId) }).toArray();
+    const myJobs = await jobsCollection.find({ user: userId }).toArray();
     const jobIds = myJobs.map(job => job._id);
 
     if (jobIds.length === 0) {
@@ -388,6 +388,7 @@ router.post("/myapplications", UserauthMiddleware, async (req, res) => {
       .find({ jobId: { $in: jobIds } })
       .sort({ createdAt: -1 })
       .toArray();
+      
 
     // ✅ Format applications with job info
     const formatted = await Promise.all(
